@@ -1,5 +1,6 @@
 [package]
 name = "simpla_vortaro"
+description = "Access the Esperanto dictionary Simpla Vortaro"
 version = "0.1.0"
 authors = ["panicbit <panicbit.dev@gmail.com>"]
 license = "MIT/Apache-2.0"
