@@ -10,6 +10,10 @@
 
 ![Definition example](screens/difinu.png)
 
+## Prebuilt binaries
+
+Prebuild binaries for Windows and Linux can be found on the [releases page](https://github.com/panicbit/simpla_vortaro_rs/releases/).
+
 ## Installation of `sv` from source
 
 ```
