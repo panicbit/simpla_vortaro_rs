@@ -132,7 +132,7 @@ fn difinu(vorto: &str, width: usize) -> sv::Result<()> {
     for (i, difino) in vorto.difinoj.iter().enumerate() {
         let i = i + 1;
         let index = format!("{}. ", i);
-        let text = format!("{}{}", index, difino.difino);
+        let text = format!("{}{}", index, difino.difino.as_ref().map(|s| &**s).unwrap_or(""));
         let subsequent_indent = create_indent(2 + index.chars().count());
         let mut wrapper = Wrapper::new(width_l1);
 

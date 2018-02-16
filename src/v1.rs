@@ -40,7 +40,7 @@ pub struct Vorto {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Difino {
-    pub difino: String,
+    pub difino: Option<String>,
     pub pludifinoj: Vec<Pludifino>,
     pub ekzemploj: Vec<Ekzemplo>,
     pub tradukoj: Vec<Traduko>,
