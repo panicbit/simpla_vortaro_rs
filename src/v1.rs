@@ -48,7 +48,7 @@ pub struct Difino {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Pludifino {
-    pub difino: String,
+    pub difino: Option<String>,
     pub ekzemploj: Vec<Ekzemplo>,
 }
 

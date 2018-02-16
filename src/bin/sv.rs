@@ -160,7 +160,7 @@ fn difinu(vorto: &str, width: usize) -> sv::Result<()> {
             let j = j + 1;
             let initial_indent = create_indent(2 + index.chars().count());
             let index = format!("{}.{}. ", i, j);
-            let text = format!("{}{}", index, pludifino.difino);
+            let text = format!("{}{}", index, pludifino.difino.as_ref().map(|s| &**s).unwrap_or(""));
             let subsequent_indent = create_indent(initial_indent.chars().count() + index.chars().count());
             let mut wrapper = Wrapper::new(width_l2);
 
