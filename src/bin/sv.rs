@@ -25,7 +25,7 @@ fn main() {
         .arg(Arg::with_name("difinu")
             .short("d")
             .long("difinu")
-            .help("Akiri difino de VORTO anstataŭ serĉi ĝin")
+            .help("Akiras la difino de la VORTO anstataŭ serĉi ĝin")
         )
         .get_matches();
     
