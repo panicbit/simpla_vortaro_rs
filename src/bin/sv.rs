@@ -7,13 +7,14 @@ extern crate textwrap;
 use clap::{App, Arg};
 use colored::Colorize;
 use itertools::Itertools;
-use textwrap::{Wrapper, termwidth};
+use textwrap::{termwidth, wrap};
 use std::borrow::Cow;
 use std::iter;
 
 // TODO: Make textwrap aware of terminal escapes
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let cli = App::new("sv")
         .version("0.1.0")
         .author("panicbit <panicbit.dev@gmail.com>")
@@ -37,8 +38,8 @@ fn main() {
     }
 
     let res = match cli.is_present("difinu") {
-        false => sercxi(vorto, width),
-        true => difinu(vorto, width),
+        false => sercxi(vorto, width).await,
+        true => difinu(vorto, width).await,
     };
 
     if let Err(e) = res {
@@ -50,8 +51,8 @@ fn print_header(text: &str) {
     println!("\n{}", text.bold());
 }
 
-fn sercxi(vorto: &str, width: usize) -> sv::Result<()> {
-    let trovo = sv::trovi(vorto)?;
+async fn sercxi(vorto: &str, width: usize) -> sv::Result<()> {
+    let trovo = sv::trovi(vorto).await?;
 
     if !trovo.preciza.is_empty() { 
         print_header("  Preciza serĉo");
@@ -66,10 +67,9 @@ fn sercxi(vorto: &str, width: usize) -> sv::Result<()> {
     if !trovo.malpreciza.is_empty() {
         let initial_indent = create_indent(4);
         let subsequent_indent = create_indent(4);
-        let mut wrapper = Wrapper::new(width);
-
-        wrapper.initial_indent = &initial_indent;
-        wrapper.subsequent_indent = &subsequent_indent;
+        let options = textwrap::Options::new(width)
+            .initial_indent(&initial_indent)
+            .subsequent_indent(&subsequent_indent);
 
         print_header("  Malpreciza serĉo");
 
@@ -78,7 +78,7 @@ fn sercxi(vorto: &str, width: usize) -> sv::Result<()> {
         let mut vortoj = trovo.malpreciza.iter().map(|v| v.bold().bright_green());
         let text = format!("{}", vortoj.join(", "));
 
-        for text in wrapper.wrap_iter(&text) {
+        for text in wrap(&text, options) {
             println!("{}", text);
         }
     }
@@ -116,13 +116,13 @@ fn create_indent(len: usize) -> Cow<'static, str> {
     iter::repeat(' ').take(len).collect()
 }
 
-fn difinu(vorto: &str, width: usize) -> sv::Result<()> {
+async fn difinu(vorto: &str, width: usize) -> sv::Result<()> {
     let mut width_l1 = width;
     let mut width_l2 = width;
     if width_l1 > 2 { width_l1 -= 2 }
     if width_l2 > 4 { width_l2 -= 4 }
 
-    let vorto = match sv::vorto(vorto)? {
+    let vorto = match sv::vorto(vorto).await? {
         None => return Ok(()),
         Some(vorto) => vorto,
     };
@@ -134,16 +134,15 @@ fn difinu(vorto: &str, width: usize) -> sv::Result<()> {
         let index = format!("{}. ", i);
         let text = format!("{}{}", index, difino.difino.as_ref().map(|s| &**s).unwrap_or(""));
         let subsequent_indent = create_indent(2 + index.chars().count());
-        let mut wrapper = Wrapper::new(width_l1);
+        let options = textwrap::Options::new(width_l1)
+            .initial_indent("  ")
+            .subsequent_indent(&subsequent_indent);
 
-        wrapper.initial_indent = "  ";
-        wrapper.subsequent_indent = &subsequent_indent;
-
-        for (i, text) in wrapper.wrap_iter(&text).enumerate() {
+        for (i, text) in wrap(&text, &options).iter().enumerate() {
             let mut text = text.as_ref();
 
             if i == 0 {
-                let pivot = wrapper.initial_indent.len() + index.len();
+                let pivot = options.initial_indent.len() + index.len();
                 let (index, rest) = text.split_at(pivot);
                 print!("{}", index.bold().bright_green());
                 text = rest;
@@ -162,18 +161,17 @@ fn difinu(vorto: &str, width: usize) -> sv::Result<()> {
             let index = format!("{}.{}. ", i, j);
             let text = format!("{}{}", index, pludifino.difino.as_ref().map(|s| &**s).unwrap_or(""));
             let subsequent_indent = create_indent(initial_indent.chars().count() + index.chars().count());
-            let mut wrapper = Wrapper::new(width_l2);
-
-            wrapper.initial_indent = &initial_indent;
-            wrapper.subsequent_indent = &subsequent_indent;
+            let options = textwrap::Options::new(width_l2)
+                .initial_indent(&initial_indent)
+                .subsequent_indent(&subsequent_indent);
 
             println!();
 
-            for (i, text) in wrapper.wrap_iter(&text).enumerate() {
+            for (i, text) in wrap(&text, &options).iter().enumerate() {
                 let mut text = text.as_ref();
 
                 if i == 0 {
-                    let pivot = wrapper.initial_indent.len() + index.len();
+                    let pivot = options.initial_indent.len() + index.len();
                     let (index, rest) = text.split_at(pivot);
                     print!("{}", index.bold().magenta());
                     text = rest;
@@ -194,7 +192,7 @@ fn difinu(vorto: &str, width: usize) -> sv::Result<()> {
 fn print_translations(tradukoj: &[sv::Traduko], indent: usize, width: usize) {
     if !tradukoj.is_empty() {
         let tradukoj = tradukoj.iter().sorted_by_key(|tra| tra.lingvo.clone());
-        let tradukoj = tradukoj.iter().group_by(|tra| &tra.lingvo);
+        let tradukoj = tradukoj.into_iter().group_by(|tra| &tra.lingvo);
         let indent = create_indent(indent);
 
         println!();
@@ -215,10 +213,9 @@ fn print_examples(ekzemploj: &[sv::Ekzemplo], indent: usize, width: usize) {
     if !ekzemploj.is_empty() {
         let initial_indent = create_indent(indent);
         let subsequent_indent = create_indent(indent + 2);
-        let mut wrapper = Wrapper::new(width);
-
-        wrapper.initial_indent = &initial_indent;
-        wrapper.subsequent_indent = &subsequent_indent;
+        let options = textwrap::Options::new(width)
+            .initial_indent(&initial_indent)
+            .subsequent_indent(&subsequent_indent);
 
         println!();
 
@@ -231,7 +228,7 @@ fn print_examples(ekzemploj: &[sv::Ekzemplo], indent: usize, width: usize) {
                 write!(text, " [{}]", fonto).unwrap();
             }
 
-            for text in wrapper.wrap_iter(&text) {
+            for text in wrap(&text, &options) {
                 println!("{}", text.blue());
             }
         }

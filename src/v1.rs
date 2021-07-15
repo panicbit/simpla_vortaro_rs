@@ -1,6 +1,5 @@
-use reqwest::get;
-use reqwest::StatusCode::NotFound;
-use percent_encoding::{utf8_percent_encode, PATH_SEGMENT_ENCODE_SET};
+use reqwest::StatusCode;
+use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 
 pub use reqwest::Result;
 
@@ -58,28 +57,41 @@ pub struct Ekzemplo {
     pub fonto: Option<String>,
 }
 
-pub fn trovi<S>(vorto: S) -> Result<Trovo>
+pub async fn trovi<S>(vorto: S) -> Result<Trovo>
 where
     S: AsRef<str>
 {
-    let vorto = utf8_percent_encode(vorto.as_ref(), PATH_SEGMENT_ENCODE_SET);
+    let vorto = utf8_percent_encode(vorto.as_ref(), NON_ALPHANUMERIC);
     let url = format!("http://www.simplavortaro.org/api/v1/trovi/{}", vorto);
     
-    get(&url)?.error_for_status()?.json()
+    let respondo = reqwest::get(&url)
+        .await?
+        .error_for_status()?;
+    
+    let trovo = respondo
+        .json::<Trovo>()
+        .await?;
+    
+    Ok(trovo)
 }
 
-pub fn vorto<S>(vorto: S) -> Result<Option<Vorto>>
+pub async fn vorto<S>(vorto: S) -> Result<Option<Vorto>>
 where
     S: AsRef<str>
 {
-    let vorto = utf8_percent_encode(vorto.as_ref(), PATH_SEGMENT_ENCODE_SET);
+    let vorto = utf8_percent_encode(vorto.as_ref(), NON_ALPHANUMERIC);
     let url = format!("http://www.simplavortaro.org/api/v1/vorto/{}", vorto);
     
-    let res = get(&url)?;
+    let respondo = reqwest::get(&url).await?;
     
-    if res.status() == NotFound {
+    if respondo.status() == StatusCode::NOT_FOUND {
         return Ok(None)
     }
 
-    res.error_for_status()?.json()
+    let respondo = respondo.error_for_status()?;
+    let vorto = respondo
+        .json::<Option<Vorto>>()
+        .await?;
+
+    Ok(vorto)
 }
