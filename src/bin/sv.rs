@@ -64,7 +64,7 @@ async fn sercxi(vorto: &str, width: usize) -> sv::Result<()> {
         println!();
 
         let mut vortoj = trovo.malpreciza.iter().map(|v| v.bold().bright_green());
-        let text = format!("{}", vortoj.join(", "));
+        let text = vortoj.join(", ");
 
         for text in wrap(&text, options) {
             println!("{}", text);
@@ -91,7 +91,8 @@ async fn sercxi(vorto: &str, width: usize) -> sv::Result<()> {
     if !trovo.tradukoj.is_empty() {
         print_header("  Alialingva serĉo");
     }
-    print_translations(&trovo.tradukoj, 4, width);
+
+    print_translations(&trovo.tradukoj, 4);
 
     println!();
 
@@ -128,11 +129,7 @@ async fn difinu(vorto: &str, width: usize) -> sv::Result<()> {
     for (i, difino) in vorto.difinoj.iter().enumerate() {
         let i = i + 1;
         let index = format!("{}. ", i);
-        let text = format!(
-            "{}{}",
-            index,
-            difino.difino.as_ref().map(|s| &**s).unwrap_or("")
-        );
+        let text = format!("{}{}", index, difino.difino.as_deref().unwrap_or(""));
         let subsequent_indent = create_indent(2 + index.chars().count());
         let options = textwrap::Options::new(width_l1)
             .initial_indent("  ")
@@ -153,17 +150,13 @@ async fn difinu(vorto: &str, width: usize) -> sv::Result<()> {
 
         print_examples(&difino.ekzemploj, index.chars().count() + 2, width);
 
-        print_translations(&difino.tradukoj, index.chars().count() + 2, width);
+        print_translations(&difino.tradukoj, index.chars().count() + 2);
 
         for (j, pludifino) in difino.pludifinoj.iter().enumerate() {
             let j = j + 1;
             let initial_indent = create_indent(2 + index.chars().count());
             let index = format!("{}.{}. ", i, j);
-            let text = format!(
-                "{}{}",
-                index,
-                pludifino.difino.as_ref().map(|s| &**s).unwrap_or("")
-            );
+            let text = format!("{}{}", index, pludifino.difino.as_deref().unwrap_or(""));
             let subsequent_indent =
                 create_indent(initial_indent.chars().count() + index.chars().count());
             let options = textwrap::Options::new(width_l2)
@@ -194,7 +187,7 @@ async fn difinu(vorto: &str, width: usize) -> sv::Result<()> {
     Ok(())
 }
 
-fn print_translations(tradukoj: &[sv::Traduko], indent: usize, width: usize) {
+fn print_translations(tradukoj: &[sv::Traduko], indent: usize) {
     if !tradukoj.is_empty() {
         let tradukoj = tradukoj.iter().sorted_by_key(|tra| tra.lingvo.clone());
         let tradukoj = tradukoj.into_iter().group_by(|tra| &tra.lingvo);
