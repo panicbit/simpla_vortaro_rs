@@ -140,7 +140,7 @@ async fn difinu(vorto: &str, width: usize) -> sv::Result<()> {
 
             if i == 0 {
                 let pivot = options.initial_indent.len() + index.len();
-                let (index, rest) = text.split_at(pivot);
+                let (index, rest) = text.split_at(pivot.min(text.len()));
                 print!("{}", index.bold().bright_green());
                 text = rest;
             }
