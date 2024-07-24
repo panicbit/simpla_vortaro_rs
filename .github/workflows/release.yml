@@ -9,18 +9,17 @@ on:
       tag:
         required: true
         type: string
-
   push:
     tags:
       - v[0-9]+.*
+
+env:
+  REF: refs/tags/${{ inputs.tag || github.ref_name }}
 
 jobs:
   create-release:
     runs-on: ubuntu-latest
     steps:
-      - name: Set environment variables
-        run: |
-          echo "REF=refs/tags/${{ inputs.tag || github.ref_name }}" >> $GITHUB_ENV
       - uses: actions/checkout@v4
         with:
           ref: ${{ env.REF }}
@@ -45,9 +44,6 @@ jobs:
             os: windows-latest
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Set environment variables
-        run: |
-          echo "REF=refs/tags/${{ inputs.tag || github.ref_name }}" >> $GITHUB_ENV
       - uses: actions/checkout@v4
         with:
           ref: ${{ env.REF }}
