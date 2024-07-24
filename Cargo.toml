@@ -9,11 +9,11 @@ documentation = "https://docs.rs/simpla_vortaro"
 edition = "2018"
 
 [dependencies]
-reqwest = { version = "0.11.25", features = ["json"] }
-serde = { version = "1.0.197", features = ["derive"] }
+reqwest = { version = "0.11.27", features = ["json"] }
+serde = { version = "1.0.204", features = ["derive"] }
 percent-encoding = "2.3.1"
-clap = { version = "4.5.2", features = ["derive"] }
+clap = { version = "4.5.10", features = ["derive"] }
 colored = "2.1.0"
 itertools = "0.12.1"
 textwrap = { version = "0.16.1", features = ["terminal_size"] }
-tokio = { version = "1.36.0", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1.39.1", features = ["macros", "rt-multi-thread"] }
