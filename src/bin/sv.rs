@@ -1,8 +1,4 @@
-extern crate clap;
-extern crate colored;
-extern crate itertools;
 extern crate simpla_vortaro as sv;
-extern crate textwrap;
 
 use clap::Parser;
 use colored::Colorize;
