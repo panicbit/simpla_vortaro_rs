@@ -19,8 +19,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set environment variables
-        env:
-          REF: ${{ inputs.tag || tag }}
+        run: |
+          echo "REF=${{ inputs.tag || tag }}" >> $GITHUB_ENV
       - uses: actions/checkout@v4
         with:
           ref: ${{ env.REF }}
@@ -46,8 +46,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Set environment variables
-        env:
-          REF: ${{ inputs.tag || tag }}
+        run: |
+          echo "REF=${{ inputs.tag || tag }}" >> $GITHUB_ENV
       - uses: actions/checkout@v4
         with:
           ref: ${{ env.REF }}
