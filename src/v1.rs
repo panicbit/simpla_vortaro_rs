@@ -1,7 +1,9 @@
-use reqwest::StatusCode;
 use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
+use reqwest::{Client, StatusCode};
 
 pub use reqwest::Result;
+
+use crate::USER_AGENT;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Trovo {
@@ -59,39 +61,35 @@ pub struct Ekzemplo {
 
 pub async fn trovi<S>(vorto: S) -> Result<Trovo>
 where
-    S: AsRef<str>
+    S: AsRef<str>,
 {
     let vorto = utf8_percent_encode(vorto.as_ref(), NON_ALPHANUMERIC);
     let url = format!("http://www.simplavortaro.org/api/v1/trovi/{}", vorto);
-    
-    let respondo = reqwest::get(&url)
-        .await?
-        .error_for_status()?;
-    
-    let trovo = respondo
-        .json::<Trovo>()
-        .await?;
-    
+
+    let kliento = Client::builder().user_agent(USER_AGENT).build()?;
+    let respondo = kliento.get(&url).send().await?.error_for_status()?;
+
+    let trovo = respondo.json::<Trovo>().await?;
+
     Ok(trovo)
 }
 
 pub async fn vorto<S>(vorto: S) -> Result<Option<Vorto>>
 where
-    S: AsRef<str>
+    S: AsRef<str>,
 {
     let vorto = utf8_percent_encode(vorto.as_ref(), NON_ALPHANUMERIC);
     let url = format!("http://www.simplavortaro.org/api/v1/vorto/{}", vorto);
-    
-    let respondo = reqwest::get(&url).await?;
-    
+
+    let kliento = Client::builder().user_agent(USER_AGENT).build()?;
+    let respondo = kliento.get(&url).send().await?;
+
     if respondo.status() == StatusCode::NOT_FOUND {
-        return Ok(None)
+        return Ok(None);
     }
 
     let respondo = respondo.error_for_status()?;
-    let vorto = respondo
-        .json::<Option<Vorto>>()
-        .await?;
+    let vorto = respondo.json::<Option<Vorto>>().await?;
 
     Ok(vorto)
 }
