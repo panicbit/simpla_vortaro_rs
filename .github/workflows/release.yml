@@ -20,7 +20,7 @@ jobs:
     steps:
       - name: Set environment variables
         run: |
-          echo "REF=${{ inputs.tag || tag }}" >> $GITHUB_ENV
+          echo "REF=${{ inputs.tag || github.ref_name }}" >> $GITHUB_ENV
       - uses: actions/checkout@v4
         with:
           ref: ${{ env.REF }}
@@ -47,7 +47,7 @@ jobs:
     steps:
       - name: Set environment variables
         run: |
-          echo "REF=${{ inputs.tag || tag }}" >> $GITHUB_ENV
+          echo "REF=${{ inputs.tag || github.ref_name }}" >> $GITHUB_ENV
       - uses: actions/checkout@v4
         with:
           ref: ${{ env.REF }}
