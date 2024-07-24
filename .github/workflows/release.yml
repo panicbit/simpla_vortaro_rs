@@ -5,6 +5,11 @@ permissions:
 
 on:
   workflow_dispatch:
+    inputs:
+      tag:
+        required: true
+        type: string
+
   push:
     tags:
       - v[0-9]+.*
@@ -13,9 +18,15 @@ jobs:
   create-release:
     runs-on: ubuntu-latest
     steps:
+      - name: Set environment variables
+        env:
+          REF: ${{ inputs.tag || tag }}
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.REF }}
       - uses: taiki-e/create-gh-release-action@v1
         with:
+          ref: ${{ env.REF }}
           # (optional) Path to changelog.
           # changelog: CHANGELOG.md
           # (required) GitHub token for creating GitHub Releases.
@@ -34,9 +45,15 @@ jobs:
             os: windows-latest
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Set environment variables
+        env:
+          REF: ${{ inputs.tag || tag }}
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.REF }}
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
+          ref: ${{ env.REF }}
           # (required) Comma-separated list of binary names (non-extension portion of filename) to build and upload.
           # Note that glob pattern is not supported yet.
           bin: sv
